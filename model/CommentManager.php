@@ -1,0 +1,41 @@
+<?php
+
+class CommentManager extends Manager
+{
+    public function getComment($commentId)
+    {
+        $db = $this-> dbConnect();
+        $statement = $db->prepare('SELECT id, auteur, commentaire, DATE_FORMAT(date_commentaire ,\'%d/%m/%Y à %Hh%imin%ss\') AS date_creation  FROM commentaires WHERE id= ?');
+        $statement->execute(array($commentId));
+
+        $comment = $statement->fetch();
+        return $comment;
+    }
+
+    public function getComments($billetId)
+    {
+        $db = $this-> dbConnect();
+        $comments = $db->prepare('SELECT id, auteur, commentaire, DATE_FORMAT(date_commentaire ,\'%d/%m/%Y à %Hh%imin%ss\') AS date_creation  FROM commentaires WHERE id_billet= ? ORDER BY id DESC');
+        $comments->execute(array($billetId));
+
+        return $comments;
+    }
+
+    public function billetComment($billetId, $auteur, $comment)
+    {
+        $db =  $this->dbConnect();
+        $comments = $db->prepare('INSERT INTO commentaires (id_billet, auteur, commentaire, date_commentaire) VALUES(?, ?, ?, NOW())');
+        $affectedLines = $comments->execute(array($billetId, $auteur, $comment));
+
+        return $affectedLines;
+    }
+    public function changeComment( $comment,$idComment)
+    {
+        $db =  $this->dbConnect();
+        $comments = $db->prepare( 'UPDATE commentaires SET commentaire = ? WHERE id = ?');
+        $affectedComment = $comments->execute(array($idComment, $comment));
+
+        return $affectedComment;
+    }
+
+}
